@@ -373,20 +373,7 @@ private fun AppTitle() {
             fontWeight = FontWeight.ExtraBold,
             color = Gold
         )
-        Text(
-            "Маленькі кроки. Велика ціль.",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF7A5A18)
-        )
-        Spacer(Modifier.height(5.dp))
-        Text(
-            "Організуйте свої кошти та створіть план для мрій уже сьогодні.",
-            fontSize = 12.sp,
-            lineHeight = 17.sp,
-            color = Color(0xFF64706B),
-            modifier = Modifier.padding(horizontal = 14.dp)
-        )
+        Spacer(Modifier.height(3.dp))
     }
 }
 
@@ -607,7 +594,7 @@ private fun PathTab(
 
     ScreenColumn {
         AppTitle()
-        SectionTitle("🎯 До цілі", "Спочатку вершини — потім твій персональний план.")
+        SectionTitle("До цілі", null)
 
         // 1. Milestones first
         Card(
@@ -699,75 +686,96 @@ private fun PathTab(
             MoneyField(
                 value = dailyText,
                 onChange = onDaily,
-                label = "₴ / день",
+                label = "Сума на день",
                 modifier = Modifier.weight(1f)
             )
             MoneyField(
                 value = yearsText,
                 onChange = onYears,
-                label = "Років",
+                label = "Термін, років",
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // 3. Personal calculator
+        // 3. Concrete projection
         Card(
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = GoldPale),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
             border = BorderStroke(1.dp, Color(0xFFE4C66A))
         ) {
             Column(
-                Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(7.dp)
+                Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    "🧮 Калькулятор мільйонера",
+                    "Що буде за цей термін",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF8A650F)
+                    color = Green
                 )
-                Text(
-                    "Цей застосунок допоможе організувати твої кошти та створити план для мрій уже сьогодні.",
-                    fontSize = 13.sp,
-                    color = Color(0xFF8A650F)
-                )
-
-                Spacer(Modifier.height(4.dp))
 
                 if (!hasTarget) {
                     Text(
-                        "Вкажи суму цілі, щоб побачити розрахунок.",
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF8A650F)
+                        "Вкажи ціль і термін — я покажу конкретний результат.",
+                        fontSize = 13.sp,
+                        color = Color(0xFF64706B)
+                    )
+                } else if (years <= 0) {
+                    Text(
+                        "Вкажи термін у роках, щоб побачити прогноз.",
+                        fontSize = 13.sp,
+                        color = Color(0xFF64706B)
                     )
                 } else {
-                    Text(
-                        "До твоєї цілі залишилось: %,d ₴".format(remaining),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF8A650F)
-                    )
+                    val plannedTotal = (current + (daily.coerceAtLeast(0).toDouble() * 365.0 * years))
+                        .toLong()
+                        .coerceAtMost(target.toLong())
+                    val plannedGain = (plannedTotal - current).coerceAtLeast(0L)
+                    val percentAtEnd = (plannedTotal.toDouble() / safeTarget * 100.0).coerceIn(0.0, 100.0)
 
-                    if (years > 0) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column {
+                            Text(
+                                "Через $years років",
+                                fontSize = 13.sp,
+                                color = Color(0xFF64706B)
+                            )
+                            Text(
+                                "%,d ₴".format(plannedTotal),
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Gold
+                            )
+                        }
                         Text(
-                            "Потрібно відкладати ≈ %,d ₴ / день".format(neededDaily.roundToInt()),
-                            color = Color(0xFF8A650F)
-                        )
-                        Text(
-                            "Або ≈ %,d ₴ / місяць".format(neededMonthly.roundToInt()),
-                            color = Color(0xFF8A650F)
-                        )
-                    } else {
-                        Text(
-                            "Вкажи термін у роках, щоб розрахувати щоденний і місячний план.",
-                            color = Color(0xFF8A650F)
+                            "%.1f%% цілі".format(percentAtEnd),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Green
                         )
                     }
 
-                    targetDays?.let {
+                    HorizontalDivider(color = Color(0xFFF0E4BE))
+
+                    Text(
+                        "Додатково накопичиш: %,d ₴".format(plannedGain),
+                        fontWeight = FontWeight.Bold,
+                        color = Green
+                    )
+                    Text(
+                        "До цілі залишиться: %,d ₴".format((target - plannedTotal).coerceAtLeast(0L)),
+                        color = Color(0xFF64706B)
+                    )
+
+                    if (daily <= 0) {
                         Text(
-                            "За темпом %,d ₴ / день: приблизно $it днів".format(currentDaily),
-                            color = Color(0xFF8A650F),
-                            fontWeight = FontWeight.Bold
+                            "Задай суму на день, щоб прогноз став точним.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF8A650F)
                         )
                     }
                 }
@@ -785,7 +793,7 @@ private fun PathTab(
                 verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 Text(
-                    "👑 Шлях до 1 000 000 ₴",
+                    "Шлях до 1 000 000 ₴",
                     color = GoldLight,
                     fontSize = 19.sp,
                     fontWeight = FontWeight.ExtraBold
@@ -842,7 +850,7 @@ private fun PathTab(
                 ) {
                     Column {
                         Text(
-                            "📈 Твій прогрес",
+                            "Твій прогрес",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Green
@@ -888,24 +896,7 @@ private fun PathTab(
             }
         }
 
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.dp, Color(0xFFF0E4BE))
-        ) {
-            Column(Modifier.padding(18.dp)) {
-                Text(
-                    "💡 Як це працює",
-                    fontWeight = FontWeight.Bold,
-                    color = Green
-                )
-                Text(
-                    "Вкажи ціль, бажану суму на день і термін. Калькулятор покаже твій план, залишок до цілі та окремо шлях до першого мільйона.",
-                    color = Color(0xFF64706B),
-                    fontSize = 13.sp
-                )
-            }
-        }
+
     }
 }
 
