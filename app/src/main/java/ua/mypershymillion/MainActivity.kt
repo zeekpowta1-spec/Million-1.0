@@ -594,7 +594,7 @@ private fun PathTab(
 
     ScreenColumn {
         AppTitle()
-        SectionTitle("До цілі", null)
+        SectionTitle("До цілі", "")
 
         // 1. Milestones first
         Card(
